@@ -1,0 +1,31 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: nyc-taxi
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # api (NodePort 30080 in the k8s base)
+      - containerPort: 30080
+        hostPort: 30080
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      # monitor (NodePort 30081)
+      - containerPort: 30081
+        hostPort: 30081
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      # grafana (NodePort 30300, kube-prometheus-stack values)
+      - containerPort: 30300
+        hostPort: 30300
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+      # prometheus (NodePort 30090, kube-prometheus-stack values)
+      - containerPort: 30090
+        hostPort: 30090
+        listenAddress: "127.0.0.1"
+        protocol: TCP
+# Let containerd pull localhost:5001 through the local registry container.
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      config_path = "/etc/containerd/certs.d"

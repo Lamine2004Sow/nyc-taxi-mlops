@@ -1,0 +1,32 @@
+# VCS, tooling and local state
+.git
+.github
+.venv
+.dual-graph
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+coverage.xml
+htmlcov
+
+# Python caches
+**/__pycache__
+**/*.py[cod]
+
+# Runtime data and experiment stores (never baked into the image)
+data
+mlruns
+mlartifacts
+reports
+predictions
+*.parquet
+
+# Not needed at runtime
+tests
+infra
+scripts
+Makefile
+docker-compose.yml
+*.md
+!README.md

@@ -1,0 +1,72 @@
+# Prometheus Operator resources. Included by overlays/local only: the CRDs come from
+# kube-prometheus-stack (make monitoring-up), which is absent in the CI kind cluster.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: api
+  namespace: nyc-taxi
+  labels:
+    app.kubernetes.io/part-of: nyc-taxi-mlops
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: monitor
+  namespace: nyc-taxi
+  labels:
+    app.kubernetes.io/part-of: nyc-taxi-mlops
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: monitor
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nyc-taxi-alerts
+  namespace: nyc-taxi
+  labels:
+    app.kubernetes.io/part-of: nyc-taxi-mlops
+spec:
+  groups:
+    - name: nyc-taxi-model
+      rules:
+        - alert: ModelMaeDegraded
+          expr: model_mae_latest > model_ref_mae * 1.15
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            summary: Replay MAE is more than 15% above the reference MAE
+            description: model_mae_latest={{ $value }} exceeds 1.15 x model_ref_mae.
+    - name: nyc-taxi-api
+      rules:
+        - alert: ApiHighErrorRate
+          expr: |
+            sum(rate(http_requests_total{job="api",status=~"5.."}[5m]))
+              / sum(rate(http_requests_total{job="api"}[5m])) > 0.05
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: More than 5% of API requests fail with 5xx
+        - alert: ApiHighLatencyP95
+          expr: |
+            histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job="api"}[5m]))) > 0.3
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            summary: API p95 latency above 300 ms

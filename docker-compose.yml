@@ -1,0 +1,56 @@
+# Local MLflow stack: PostgreSQL backend store + MLflow server with artifact proxy.
+# `mlflow` also joins the external `kind` network so kind pods can reach it
+# (the network is created by `kind create cluster`, hence `make cluster-up` must run first).
+name: nyc-taxi
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: mlflow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow -d mlflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mlflow:
+    build: ./infra/mlflow
+    container_name: nyc-taxi-mlflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - mlflow
+      - server
+      - --backend-store-uri
+      - postgresql://mlflow:mlflow@postgres:5432/mlflow
+      - --serve-artifacts
+      - --artifacts-destination
+      - /mlartifacts
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      # MLflow 3.x rejects unknown Host headers; pods address it as `mlflow:5000`.
+      - --allowed-hosts
+      - "localhost:*,127.0.0.1:*,mlflow:*,nyc-taxi-mlflow:*"
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlartifacts:/mlartifacts
+    networks:
+      - default
+      - kind
+
+networks:
+  kind:
+    external: true
+
+volumes:
+  pgdata:
+  mlartifacts:

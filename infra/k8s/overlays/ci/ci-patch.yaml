@@ -1,0 +1,31 @@
+# Kind-in-CI: the image is loaded with `kind load docker-image`, never pulled.
+# No MLflow: the champion model is baked into the image (models/champion).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          imagePullPolicy: Never
+          env:
+            - name: MODEL_DIR
+              value: /app/models/champion
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitor
+spec:
+  template:
+    spec:
+      containers:
+        - name: monitor
+          imagePullPolicy: Never
+          env:
+            - name: RETRAIN_MODE
+              value: dry-run
+            - name: RETRAIN_IMAGE
+              value: nyc-taxi-mlops:ci

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitor
+spec:
+  template:
+    spec:
+      containers:
+        - name: monitor
+          imagePullPolicy: Always
+          env:
+            - name: RETRAIN_MODE
+              value: k8s
+            - name: RETRAIN_IMAGE
+              value: localhost:5001/nyc-taxi-mlops:dev
+            - name: MLFLOW_TRACKING_URI
+              value: http://mlflow:5000
+            # Retrain Jobs download their own data into /tmp (no shared volume with the host).
+            - name: DATA_DIR
+              value: /tmp/data
+            - name: REPORTS_DIR
+              value: /tmp/reports

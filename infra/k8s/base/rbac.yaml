@@ -1,0 +1,32 @@
+# The monitor creates retrain Jobs from the Alertmanager webhook; it needs no other rights.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitor
+  labels:
+    app.kubernetes.io/part-of: nyc-taxi-mlops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: monitor-retrain
+  labels:
+    app.kubernetes.io/part-of: nyc-taxi-mlops
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: monitor-retrain
+  labels:
+    app.kubernetes.io/part-of: nyc-taxi-mlops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: monitor-retrain
+subjects:
+  - kind: ServiceAccount
+    name: monitor

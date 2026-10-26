@@ -1,0 +1,80 @@
+# Values for prometheus-community/kube-prometheus-stack (installed by `make monitoring-up`).
+# Kept light for a single-node kind cluster.
+
+defaultRules:
+  create: true
+
+nodeExporter:
+  enabled: false
+
+kubeStateMetrics:
+  enabled: false
+
+# Control-plane components are not scrapeable in kind.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+prometheusOperator:
+  admissionWebhooks:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 96Mi
+
+prometheus:
+  service:
+    type: NodePort
+    nodePort: 30090
+  prometheusSpec:
+    retention: 2d
+    resources:
+      requests:
+        cpu: 100m
+        memory: 384Mi
+    # Pick up ServiceMonitors and PrometheusRules from every namespace (nyc-taxi),
+    # not only the ones labelled with the Helm release.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorNamespaceSelector: {}
+    podMonitorNamespaceSelector: {}
+    ruleNamespaceSelector: {}
+
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      receiver: "null"
+      group_by: ["alertname"]
+      routes:
+        - receiver: retrain-webhook
+          matchers:
+            - alertname="ModelMaeDegraded"
+          continue: false
+    receivers:
+      - name: "null"
+      - name: retrain-webhook
+        webhook_configs:
+          - url: http://monitor.nyc-taxi.svc:8000/alerts
+            send_resolved: true
+
+grafana:
+  adminUser: admin
+  adminPassword: admin
+  service:
+    type: NodePort
+    nodePort: 30300
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL

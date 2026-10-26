@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+replicas:
+  - name: api
+    count: 1
+images:
+  - name: nyc-taxi-mlops
+    newName: nyc-taxi-mlops
+    newTag: ci
+patches:
+  - path: ci-patch.yaml
