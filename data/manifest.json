@@ -3,5 +3,35 @@
     "bytes": 93562858,
     "sha256": "0c32c1d5ef0d37ac3ff1a3f1880f247cc40165edf18626e5a86866296a4a5b93",
     "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-01.parquet"
+  },
+  "2020-02": {
+    "bytes": 92134881,
+    "sha256": "e57df0e7c410c02d78cd59a31394a118f3d92c50560a2d8fa3a2bf5e17dcffaa",
+    "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-02.parquet"
+  },
+  "2020-03": {
+    "bytes": 44442590,
+    "sha256": "6fa1343946bc1e3702fc351ff9818787cc40e4cf2b095d947ff5e452b5b42f84",
+    "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-03.parquet"
+  },
+  "2020-04": {
+    "bytes": 4442620,
+    "sha256": "3104e1e5548ade630988a4a8b9ec76c51a057b88159f78676c7d344f48491450",
+    "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-04.parquet"
+  },
+  "2020-05": {
+    "bytes": 6229864,
+    "sha256": "f6167e3c8f1039ec4015cb121e73f8e08710ad1681da747f2b5aa504008cf289",
+    "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-05.parquet"
+  },
+  "2020-06": {
+    "bytes": 9505358,
+    "sha256": "1ad5d65c3951d9082ab5e24acca2235cc34f014a34b4225556cb9a885cb1101d",
+    "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-06.parquet"
+  },
+  "2020-07": {
+    "bytes": 13387778,
+    "sha256": "14a450d61c1828a3e9f3f29e3e2594b4c0eb687cd2fb0e9eeb2e10dbed9e4eb2",
+    "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2020-07.parquet"
   }
 }

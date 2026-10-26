@@ -1,0 +1,80 @@
+[
+  {
+    "month": "2020-02",
+    "model_version": "1",
+    "mae": 3.1300450985201773,
+    "baseline_mae": 3.818505916666666,
+    "ref_mae": 3.27948287437763,
+    "drift_share": 0.0,
+    "n_drifted": 0,
+    "n": 300000,
+    "degraded": false,
+    "retrained": false,
+    "promoted": false
+  },
+  {
+    "month": "2020-03",
+    "model_version": "1",
+    "mae": 3.25228603190153,
+    "baseline_mae": 3.993708333333333,
+    "ref_mae": 3.27948287437763,
+    "drift_share": 0.0,
+    "n_drifted": 0,
+    "n": 300000,
+    "degraded": false,
+    "retrained": false,
+    "promoted": false
+  },
+  {
+    "month": "2020-04",
+    "model_version": "1",
+    "mae": 4.5103687997654545,
+    "baseline_mae": 5.179849845426992,
+    "ref_mae": 3.27948287437763,
+    "drift_share": 0.6666666666666666,
+    "n_drifted": 4,
+    "n": 230851,
+    "degraded": true,
+    "retrained": true,
+    "promoted": true
+  },
+  {
+    "month": "2020-05",
+    "model_version": "2",
+    "mae": 3.3208481748906458,
+    "baseline_mae": 5.741154416666667,
+    "ref_mae": 3.087445055400875,
+    "drift_share": 0.8333333333333334,
+    "n_drifted": 5,
+    "n": 300000,
+    "degraded": false,
+    "retrained": false,
+    "promoted": false
+  },
+  {
+    "month": "2020-06",
+    "model_version": "2",
+    "mae": 3.5499215278555063,
+    "baseline_mae": 5.220193555555555,
+    "ref_mae": 3.087445055400875,
+    "drift_share": 0.8333333333333334,
+    "n_drifted": 5,
+    "n": 300000,
+    "degraded": false,
+    "retrained": false,
+    "promoted": false
+  },
+  {
+    "month": "2020-07",
+    "model_version": "2",
+    "mae": 3.623076954707651,
+    "baseline_mae": 5.032882444444445,
+    "ref_mae": 3.087445055400875,
+    "drift_share": 0.3333333333333333,
+    "n_drifted": 2,
+    "n": 300000,
+    "degraded": true,
+    "retrained": true,
+    "promoted": true
+  }
+]

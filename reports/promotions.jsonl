@@ -1,0 +1,2 @@
+{"month": "2020-04", "timestamp": "2026-10-26T06:48:30.957144+00:00", "source": "retrain-job", "previous_champion": "1", "challenger_version": "2", "champion_mae": 4.48893365026267, "challenger_mae": 3.087445055400875, "promoted": true, "new_champion": "2"}
+{"month": "2020-07", "timestamp": "2026-10-26T06:51:13.097721+00:00", "source": "retrain-job", "previous_champion": "2", "challenger_version": "3", "champion_mae": 3.634402261070968, "challenger_mae": 3.04222106071796, "promoted": true, "new_champion": "3"}
