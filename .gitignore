@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data / runtime
+data/raw/
+data/processed/
+mlruns/
+mlartifacts/
+models/
+predictions/
+*.parquet
+!tests/fixtures/*.parquet
+.dual-graph/
