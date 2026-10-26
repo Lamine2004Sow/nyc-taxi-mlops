@@ -18,9 +18,9 @@ KUBECTL := kubectl --context $(KUBE_CONTEXT)
 HELM := helm --kube-context $(KUBE_CONTEXT)
 
 IMAGE_LOCAL := localhost:5001/nyc-taxi-mlops:dev
-MLFLOW_URI := http://localhost:5000
-API_URL := http://localhost:30080
-MONITOR_URL := http://localhost:30081
+MLFLOW_URI := http://127.0.0.1:5000
+API_URL := http://127.0.0.1:30080
+MONITOR_URL := http://127.0.0.1:30081
 # Host-side commands talk to MLflow on localhost; this prefix sets it for one command.
 TRACK := MLFLOW_TRACKING_URI=$(MLFLOW_URI)
 

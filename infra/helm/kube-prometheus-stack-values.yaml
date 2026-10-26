@@ -21,6 +21,8 @@ kubeProxy:
   enabled: false
 
 prometheusOperator:
+  tls:
+    enabled: false
   admissionWebhooks:
     enabled: false
   resources:
@@ -53,7 +55,10 @@ alertmanager:
       resolve_timeout: 5m
     route:
       receiver: "null"
-      group_by: ["alertname"]
+      group_by: ["alertname", "month"]
+      group_wait: 10s
+      group_interval: 30s
+      repeat_interval: 4h
       routes:
         - receiver: retrain-webhook
           matchers:

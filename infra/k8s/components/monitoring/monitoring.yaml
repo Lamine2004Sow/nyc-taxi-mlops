@@ -15,6 +15,8 @@ spec:
     - port: http
       path: /metrics
       interval: 15s
+      # Keep the app's own `endpoint` label (route path) instead of renaming it.
+      honorLabels: true
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -31,6 +33,8 @@ spec:
     - port: http
       path: /metrics
       interval: 15s
+      # Keep the app's own `endpoint` label (route path) instead of renaming it.
+      honorLabels: true
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -44,7 +48,9 @@ spec:
     - name: nyc-taxi-model
       rules:
         - alert: ModelMaeDegraded
-          expr: model_mae_latest > model_ref_mae * 1.15
+          # One alert per replayed month (the month label comes from replay_month_info), so each
+          # degraded month notifies Alertmanager once.
+          expr: (model_mae_latest > on() model_ref_mae * 1.15) * on() group_left(month) replay_month_info
           for: 0m
           labels:
             severity: warning
