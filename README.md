@@ -31,6 +31,14 @@ is triggered on **MAE degradation**, and drift is kept as a diagnostic
 with one Evidently HTML report per month in [reports/drift/](reports/drift/). Promotion decisions:
 [reports/promotions.jsonl](reports/promotions.jsonl).
 
+### Grafana during the replays
+
+![Grafana dashboard](docs/grafana-mae-drift.png)
+
+Each block is one replay run. When the green line (champion MAE) crosses the dashed line
+(1.15 × reference MAE), `ModelMaeDegraded` fires. After the promotion, the reference (yellow) moves to
+the new champion's own MAE.
+
 ## How the loop works
 
 ```mermaid
