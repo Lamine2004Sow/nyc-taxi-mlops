@@ -115,7 +115,9 @@ def test_firing_alert_creates_one_job(setup) -> None:
     assert job.metadata.labels == {"app": APP_LABEL}
     container = job.spec.template.spec.containers[0]
     assert container.command == ["python", "-m", "nyc_taxi", "retrain", "--month", "2020-03"]
-    assert {e.name: e.value for e in container.env} == {"MLFLOW_TRACKING_URI": "http://mlflow:5000"}
+    env = {e.name: e.value for e in container.env}
+    assert env["MLFLOW_TRACKING_URI"] == "http://mlflow:5000"
+    assert env["DATA_DIR"].startswith("/tmp")
     assert metrics.registry.get_sample_value("retrain_jobs_triggered_total") == 1.0
     assert resp.json()["decisions"][0]["action"] == "created"
 
@@ -190,10 +192,12 @@ def test_dry_run_records_decision_without_api_calls() -> None:
     assert launcher.handle_alert("2020-04").reason == "cooldown"
 
 
-def test_build_retrain_job_without_mlflow_uri_has_no_env() -> None:
+def test_build_retrain_job_without_mlflow_uri_writes_under_tmp() -> None:
     job = build_retrain_job("2020-05", "ns", "img:1", mlflow_uri=None, now=1700000000)
     assert job.metadata.name == "nyc-taxi-retrain-202005-1700000000"
-    assert job.spec.template.spec.containers[0].env is None
+    env = {e.name: e.value for e in job.spec.template.spec.containers[0].env}
+    assert "MLFLOW_TRACKING_URI" not in env
+    assert all(env[k].startswith("/tmp") for k in ("DATA_DIR", "REPORTS_DIR", "MODELS_DIR"))
     assert job.spec.template.spec.restart_policy == "Never"
 
 

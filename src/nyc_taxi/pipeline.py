@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,9 @@ API_BATCH_SIZE = 1000
 RECENT_DAYS_FRAC = 0.75
 DRIFT_SAMPLE_ROWS = 50_000
 CI_HOLDOUT_FRAC = 0.2
+RETRAIN_WAIT_SECONDS = 900
+API_RELOAD_WAIT_SECONDS = 180
+POLL_SECONDS = 5
 
 
 def _append_jsonl(path: Path, record: dict[str, Any]) -> None:
@@ -165,6 +169,49 @@ def retrain(month: str, settings: Settings, ref_df: pd.DataFrame | None = None) 
     }
     _append_jsonl(Path(settings.reports_dir) / "promotions.jsonl", record)
     return record
+
+
+def wait_for_retrain(
+    month: str, champion_version: str, settings: Settings
+) -> dict[str, Any] | None:
+    """Poll the registry until a retrain Job registers a new champion or challenger."""
+    challenger_before = get_alias_version(CHALLENGER_ALIAS, settings.tracking_uri)
+    deadline = time.monotonic() + RETRAIN_WAIT_SECONDS
+    while time.monotonic() < deadline:
+        champion_now = get_alias_version(CHAMPION_ALIAS, settings.tracking_uri)
+        challenger_now = get_alias_version(CHALLENGER_ALIAS, settings.tracking_uri)
+        if champion_now != champion_version or challenger_now != challenger_before:
+            promoted = champion_now != champion_version
+            new_version = champion_now if promoted else challenger_now
+            _, meta, _ = load_alias(CHAMPION_ALIAS if promoted else CHALLENGER_ALIAS, settings)
+            record = {
+                "month": month,
+                "timestamp": utc_now_iso(),
+                "source": "retrain-job",
+                "previous_champion": champion_version,
+                "challenger_version": new_version,
+                "champion_mae": meta.get("champion_holdout_mae"),
+                "challenger_mae": meta.get("metrics", {}).get("mae"),
+                "promoted": promoted,
+                "new_champion": champion_now,
+            }
+            _append_jsonl(Path(settings.reports_dir) / "promotions.jsonl", record)
+            return record
+        time.sleep(POLL_SECONDS)
+    return None
+
+
+def wait_for_api_version(api_url: str, version: str) -> bool:
+    """Wait until every API replica serves `version` (several consecutive matching probes)."""
+    deadline = time.monotonic() + API_RELOAD_WAIT_SECONDS
+    streak = 0
+    while time.monotonic() < deadline:
+        resp = requests.get(f"{api_url.rstrip('/')}/health", timeout=10)
+        streak = streak + 1 if resp.ok and str(resp.json().get("model_version")) == version else 0
+        if streak >= 6:
+            return True
+        time.sleep(2)
+    return False
 
 
 def _post_evaluation(monitor_url: str, payload: dict[str, Any]) -> None:
@@ -296,7 +343,14 @@ def run_replay(
                     "n": model_metrics["n"],
                 },
             )
-        if degraded:
+        if degraded and monitor_url:
+            # Ops mode: the monitor's alert launches the retrain Job; we only observe the registry.
+            record = wait_for_retrain(month, version, settings)
+            row["retrained"] = record is not None
+            row["promoted"] = bool(record and record["promoted"])
+            if row["promoted"] and api_url:
+                wait_for_api_version(api_url, record["new_champion"])
+        elif degraded:
             record = retrain(month, settings, ref_df)
             row["retrained"] = True
             row["promoted"] = bool(record["promoted"])

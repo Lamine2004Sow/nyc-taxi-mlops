@@ -34,12 +34,23 @@ def build_retrain_job(
     """Build the k8s Job that runs `python -m nyc_taxi retrain --month <month>`."""
     stamp = int(now if now is not None else time.time())
     name = f"nyc-taxi-retrain-{month.replace('-', '')}-{stamp}"
-    env = [client.V1EnvVar(name="MLFLOW_TRACKING_URI", value=mlflow_uri)] if mlflow_uri else None
+    # The image runs as a non-root user with a read-only /app: work under /tmp.
+    env = [
+        client.V1EnvVar(name="DATA_DIR", value="/tmp/data"),
+        client.V1EnvVar(name="REPORTS_DIR", value="/tmp/reports"),
+        client.V1EnvVar(name="MODELS_DIR", value="/tmp/models"),
+        client.V1EnvVar(name="SAMPLE_ROWS", value=os.getenv("SAMPLE_ROWS", "300000")),
+    ]
+    if mlflow_uri:
+        env.append(client.V1EnvVar(name="MLFLOW_TRACKING_URI", value=mlflow_uri))
     container = client.V1Container(
         name="retrain",
         image=image,
         command=["python", "-m", "nyc_taxi", "retrain", "--month", month],
         env=env,
+        resources=client.V1ResourceRequirements(
+            requests={"cpu": "500m", "memory": "1Gi"}, limits={"memory": "3Gi"}
+        ),
     )
     template = client.V1PodTemplateSpec(
         metadata=client.V1ObjectMeta(labels={"app": APP_LABEL}),
